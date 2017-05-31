@@ -3,12 +3,21 @@
 
     <item
         is-multidex="true"
-        jar="/Users/ucheudeh/AndroidStudioProjects/Emene/app/build/intermediates/incremental-classes/debug/instant-run-bootstrap.jar"
+        jar="/Users/ucheudeh/AndroidStudioProjects/Emene/app/build/Serializers/MsgPack/msgpack-0.6.12.jar"
         jumboMode="true"
         optimize="true"
         revision="25.0.3"
-        sha1="bde210cab0a72c421f1585aaec96b57e4d672bbf">
-        <dex dex="/Users/ucheudeh/AndroidStudioProjects/Emene/app/build/intermediates/transforms/dex/debug/folders/1000/10000/instant-run-bootstrap_3a1dc068b09d2ebd80262a3aa978631de665ab38/classes.dex" />
+        sha1="6a0c88fe022993c490011c3dce7127b29f9a9b3b">
+        <dex dex="/Users/ucheudeh/AndroidStudioProjects/Emene/app/build/intermediates/transforms/dex/debug/folders/1000/2/msgpack-0.6.12_1337e90c6236dd767c05d2d0e672328231ddfb23/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/ucheudeh/AndroidStudioProjects/Emene/app/build/commons-math3-3.6.1/commons-math3-3.6.1.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.3"
+        sha1="e4ba98f1d4b3c80ec46392f25e094a6a2e58fcbf">
+        <dex dex="/Users/ucheudeh/AndroidStudioProjects/Emene/app/build/intermediates/transforms/dex/debug/folders/1000/2/commons-math3-3.6.1_094f5f9d80fbb516219d32bb8405e1d06b532fbd/classes.dex" />
     </item>
     <item
         is-multidex="true"
@@ -18,6 +27,15 @@
         revision="25.0.3"
         sha1="caff8e51a24901cfc9cd7e1cf83d84f4cb0c103b">
         <dex dex="/Users/ucheudeh/AndroidStudioProjects/Emene/app/build/intermediates/transforms/dex/debug/folders/1000/10000/instant-run_21c17c44b996014120f22166c9a39b6a0b3410a8/classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="/Users/ucheudeh/AndroidStudioProjects/Emene/app/build/intermediates/incremental-classes/debug/instant-run-bootstrap.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="25.0.3"
+        sha1="bde210cab0a72c421f1585aaec96b57e4d672bbf">
+        <dex dex="/Users/ucheudeh/AndroidStudioProjects/Emene/app/build/intermediates/transforms/dex/debug/folders/1000/10000/instant-run-bootstrap_3a1dc068b09d2ebd80262a3aa978631de665ab38/classes.dex" />
     </item>
 
 </items>

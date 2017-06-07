@@ -40,7 +40,7 @@ public class StartUpApp extends AppCompatActivity {
         Log.i("Emene", "Commencing Data creation");
         SnapshotsBasket numData = new SnapshotsBasket();// create the data
 
-        Experiment[] allRuns = {new Experiment("jSeriWriter", "Normal, RandomAccess, MMAP"){
+        Experiment[] allRuns = new Experiment[]{new Experiment("jSeriWriter", "Normal, RandomAccess, MMAP") {
             //Random Access and MMAP granularity to vary in  experiments whole to numerical
 
 
@@ -84,34 +84,30 @@ public class StartUpApp extends AppCompatActivity {
                 FileChannel multiRand = new RandomAccessFile(multiMatrix, "r").getChannel();
                 long multiRandSize = multiRand.size();
                 final int LENGHT = 8;
-                int off1= (int)multiRandSize- LENGHT;
+                int off1 = (int) multiRandSize - LENGHT;
 
-                long librarySize =(long)getChunk(multiRand,off1, LENGHT);
+                long librarySize = (long) getChunk(multiRand, off1, LENGHT);
 
                 // get library
-                int libLenght = (int)librarySize*8;
-                int libStart = (int)(multiRandSize-(libLenght+LENGHT));//locate
-                long [] library = (long[])getChunk(multiRand, libStart, libLenght);
+                int libLenght = (int) librarySize * 8;
+                int libStart = (int) (multiRandSize - (libLenght + LENGHT));//locate
+                long[] library = (long[]) getChunk(multiRand, libStart, libLenght);
 
                 // Read Matrix
-                Array2DRowRealMatrix[] matrixArray = new Array2DRowRealMatrix[(int)librarySize/2];
-                for (int i =0; i<librarySize/2;i++){// each matrix occupies exactly 2 cells in library
-                    int offsetIndex = (i+1)*2-2;
-                    int lenghtIndex = (i+1)*2-1;
-                    matrixArray[i]= (Array2DRowRealMatrix)getChunk(multiRand,(int)library[offsetIndex],(int)library[lenghtIndex]);
+                Array2DRowRealMatrix[] matrixArray = new Array2DRowRealMatrix[(int) librarySize / 2];
+                for (int i = 0; i < librarySize / 2; i++) {// each matrix occupies exactly 2 cells in library
+                    int offsetIndex = (i + 1) * 2 - 2;
+                    int lenghtIndex = (i + 1) * 2 - 1;
+                    matrixArray[i] = (Array2DRowRealMatrix) getChunk(multiRand, (int) library[offsetIndex], (int) library[lenghtIndex]);
                 }
 
-                Log.i(seriType+ioMode, "RandomAccessRead Complete");
-
-
-
-
-
+                Log.i(seriType + ioMode, "RandomAccessRead Complete");
 
 
             }
+
             @Override
-            public void writeData(SnapshotsBasket numData) throws IOException {
+            public void writeDataSingle(SnapshotsBasket numData) throws IOException {
                 /*
                 Write each of the elements to an individual file after serializing: JAVA
                 File name format: SinglyJSnapMatrix1.dat, SinglyJSnapVector1.dat
@@ -119,22 +115,57 @@ public class StartUpApp extends AppCompatActivity {
 
                 String matrixFilename = "SinglyJSnapMatrix";
                 //read each matrix from numData and write each to a file on the App dir.
-                for (int i=0; i<numData.getaMsize();i++){
+
+                ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+                ObjectOutputStream out = new ObjectOutputStream(byteOut);
+                for (int i = 0; i < numData.getaMsize(); i++) {
                     String filename = matrixFilename.concat(Integer.toString(i)).concat(".dat");
-                    try{
-                        File file = new File(context.getFilesDir(),filename);
+                    try {
+                        File file = new File(context.getFilesDir(), filename); // new file created
                         FileChannel fc = new FileOutputStream(file).getChannel();
-                        ByteArrayOutputStream byteOut=new ByteArrayOutputStream();
-                        ObjectOutputStream out = new ObjectOutputStream(byteOut);
+
                         out.writeObject(numData.getaM(i));//writes Array2DMatrix
+                        out.flush();
                         fc.write(ByteBuffer.wrap(byteOut.toByteArray())); // converts to Buffer
-                        out.close();
-                    }catch (IOException e){
-                        Log.e(seriType+ioMode, " : IO exception at creating file check permission");
+                        Log.i(seriType+ioMode," : wrote to file: "+filename+" "+ fc.size());
+                        byteOut.reset(); // clear byteOutput stream for reuse by ObjectStreamwriter
+                    } catch (IOException e) {
+                        Log.e(seriType + ioMode, " : IO exception at creating file check permission");
                     }
 
 
                 }
+
+
+                String vectorFilename = "SinglyJSnapVector";
+                //read each snapshot vector from numData and write each to a file on the App dir.
+
+
+                for (int i = 0; i < numData.getsnapshotSize(); i++) {
+                    String filename = matrixFilename.concat(Integer.toString(i)).concat(".dat");
+
+                    try {
+                        File file = new File(context.getFilesDir(), filename);
+                        FileChannel fc = new FileOutputStream(file).getChannel();
+
+                        out.writeObject(numData.getSnapshot(i));//writes Realvector
+                        out.flush();
+                        fc.write(ByteBuffer.wrap(byteOut.toByteArray())); // converts to Buffer
+                        Log.i(seriType+ioMode," : wrote to file: "+filename+" "+ fc.size());
+                        byteOut.reset();
+                    } catch (IOException e) {
+                        Log.e(seriType + ioMode, " : IO exception at creating file check permission");
+                    }
+
+
+                }
+                out.close();// close Object stream
+
+            }
+
+            @Override
+            public void writeDataOneFile(SnapshotsBasket numData) throws IOException {
+
                 // RANDOM ACCESS SEEK() IMPLEMENTATION. Write one file containing all the matrices using RandomAccess
 
                 /*
@@ -163,58 +194,50 @@ public class StartUpApp extends AppCompatActivity {
                 try {
 
                     File fileMulti = new File(context.getFilesDir(), multiMatrix);
-                    RandomAccessFile fcMulti = new RandomAccessFile(fileMulti,"rw");//randomaccess change to
+                    //RandomAccessFile fcMulti = new RandomAccessFile(fileMulti, "rw")//java.io;
+                    FileChannel fcMulti = new RandomAccessFile(fileMulti, "rw").getChannel();//java.nio
                     ByteArrayOutputStream byteMult = new ByteArrayOutputStream();
                     ObjectOutputStream outMult = new ObjectOutputStream(byteMult);
-                    for (int i = 0; i < 4; i++ ){
+                    for (int i = 0; i < numData.getaMsize(); i++) { // write can go to method
                         // add an object to the byteArrayOutputstream and then note the end point
                         outMult.writeObject(numData.getaM(i));// °Serialization here
+                        outMult.flush();
                         //the first write starts at the 0th position
-                        long k = fcMulti.getFilePointer();// the desire read offset for this matrix/vector
-                        randomInOut.add(k);//every write has a start position ;-)
-                        fcMulti.write(byteMult.toByteArray());
+                        long k = fcMulti.position();// the desire read offset- java.nio
+                        //long k = fcMulti.getFilePointer();// the desire read offset java.io
+                        randomInOut.add(k);// offset fir this write
+                        fcMulti.write(ByteBuffer.wrap(byteMult.toByteArray()));// write java.nio
+                        //fcMulti.write(byteMult.toByteArray());// java.io write
                         //fcMulti.position(fcMulti.size()) ; //define the new position as the end of write
-                        randomInOut.add(fcMulti.getFilePointer()-k);//put the length of this matrix/vector
+                        //randomInOut.add(fcMulti.getFilePointer() - k);//put the length - java.oi
+                        randomInOut.add(fcMulti.position() - k);//put the length - java.nio
                         byteMult.reset();//clears the bytearrayoutputstream.
 
                     }
                     // Serialize  arrayList and its size to ByteArrayOutputStream
-                    long librarySize= randomInOut.size();
+                    long librarySize = randomInOut.size();// write can go to method
                     outMult.writeObject(randomInOut.toArray());//now and array of long
+                    outMult.flush();
+                    fcMulti.write(ByteBuffer.wrap(byteMult.toByteArray()));// write java.nio
+                    byteMult.reset();
                     outMult.writeLong(librarySize);// assumes the write sequence is respected
+                    outMult.flush();
+                    fcMulti.write(ByteBuffer.wrap(byteMult.toByteArray()));// write java.nio
                     // write ByteArrayOutputStream to file
-                    fcMulti.write(byteMult.toByteArray());
+                    //fcMulti.write(byteMult.toByteArray()); java.io
 
                     outMult.close();
-
 
 
                     fcMulti.close();
 
 
-                }catch(IOException e){
-                    Log.e(seriType+ioMode, " : Multi File IO error");
+                } catch (IOException e) {
+                    Log.e(seriType + ioMode, " : Multi File IO error");
                 }
 
 
-                String vectorFilename = "SinglyJSnapVector";
-                //read each snapshot vector from numData and write each to a file on the App dir.
-                for (int i=0; i<4;i++){
-                    String filename = matrixFilename.concat(Integer.toString(i)).concat(".dat");
-                    try{
-                        File file = new File(context.getFilesDir(),filename);
-                        FileChannel fc = new FileOutputStream(file).getChannel();
-                        ByteArrayOutputStream byteOut=new ByteArrayOutputStream();
-                        ObjectOutputStream out = new ObjectOutputStream(byteOut);
-                        out.writeObject(numData.getSnapshot(i));//writes Realvector
-                        fc.write(ByteBuffer.wrap(byteOut.toByteArray())); // converts to Buffer
-                        byteOut.close();
-                    }catch (IOException e){
-                        Log.e(seriType+ioMode, " : IO exception at creating file check permission");
-                    }
 
-
-                }
             }
         }};
 

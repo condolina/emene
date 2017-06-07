@@ -24,7 +24,11 @@ import java.io.IOException;
         try{
             long startTime = System.nanoTime();
             Log.i(seriType+ioMode + "Start Time: ", Long.toString(startTime));
-            readTest();
+            try {
+                readTest();
+            } catch (ClassNotFoundException e) {
+                Log.i("Read file", "class not found");
+            }
             long endTime = System.nanoTime();
             Log.i(seriType+ioMode + "End Time: ", Long.toString(endTime));
             Log.i(seriType+ioMode + "Total_Duration: ", Double.toString(endTime-startTime));
@@ -36,7 +40,10 @@ import java.io.IOException;
     }
 
     public abstract void readTest() throws IOException, ClassNotFoundException;
-    public abstract void writeData(SnapshotsBasket numData) throws IOException;
 
 
+
+    public abstract void writeDataSingle(SnapshotsBasket numData) throws IOException;
+
+    public abstract void writeDataOneFile(SnapshotsBasket numData) throws IOException;
 }

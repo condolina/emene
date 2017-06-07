@@ -41,4 +41,8 @@ class SnapshotsBasket {
     public int getaMsize() {
         return this.aM.length;
     }
+
+    public int getsnapshotSize() {
+        return this.snapshot.length;
+    }
 }
